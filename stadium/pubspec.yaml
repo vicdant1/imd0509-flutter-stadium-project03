@@ -18,6 +18,18 @@ dependencies:
   json_annotation: ^4.3.0
   flutter_map: ^6.1.0
   latlong2: ^0.9.1
+  geolocator: ^10.0.0
+  geocoding: ^2.0.0
+  crypto: ^3.0.3
+  path_provider: ^2.0.11
+  image_picker: ^1.0.1
+  file_picker: ^8.0.0+1
+  firebase_core: ^2.27.0
+  firebase_messaging: ^14.7.10
+  shared_preferences: ^2.0.6
+  local_auth: ^2.1.8  
+
+
 
 dev_dependencies:
   flutter_test:

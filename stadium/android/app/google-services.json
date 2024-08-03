@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "825565692233",
+    "firebase_url": "https://stadium-project-2409b-default-rtdb.firebaseio.com",
+    "project_id": "stadium-project-2409b",
+    "storage_bucket": "stadium-project-2409b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:825565692233:android:ef718c039cfd69234e5a98",
+        "android_client_info": {
+          "package_name": "com.example.stadium"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCufllYsf5lFN7DvqxmXWKAMOBc13MH4M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
