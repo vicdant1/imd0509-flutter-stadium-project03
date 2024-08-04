@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 import 'package:stadium/home/repository/home_repository.dart';
+import 'package:stadium/local_service.dart';
 import 'package:stadium/models/clubes.dart';
 import 'package:stadium/models/estadios.dart';
 import 'package:stadium/models/jogadores.dart';
@@ -12,6 +13,7 @@ class HomeController = _HomeControllerBase with _$HomeController;
 
 abstract class _HomeControllerBase with Store {
   final HomeRepository repository = Modular.get();
+  final LocationService locationService = LocationService();
 
   final nomeController = TextEditingController();
   final imagemUrlController = TextEditingController();
@@ -31,6 +33,9 @@ abstract class _HomeControllerBase with Store {
   int valorSelecionado = 0;
 
   @observable
+  String? localizacao;
+
+  @observable
   String idSelecionado = '';
 
   @observable
@@ -46,42 +51,79 @@ abstract class _HomeControllerBase with Store {
   List<Estadios> estadios = [];
 
   @action
+  Future getLocation() async {
+    localizacao = await locationService.getCurrentAddress();
+  }
+
+  @action
   void setValorSelecionado(int? value) => valorSelecionado = value ?? 0;
 
   Future postClube(Clubes clube) async {
-    await repository.postClube(clube);
+    try {
+      await repository.postClube(clube);
+    } on Exception catch (e) {
+      print(e);
+    }
   }
 
   Future postJogador(List<Jogador> jogador, String id) async {
-    await repository.postJogador(jogador, id);
+    try {
+      await repository.postJogador(jogador, id);
+    } on Exception catch (e) {
+      print(e);
+    }
   }
 
   @action
   Future getClubes() async {
-    clubes = await repository.getClubes();
+    try {
+      clubes = await repository.getClubes();
+    } on Exception catch (e) {
+      print(e);
+    }
   }
 
   Future postEstadio(Estadios estadio) async {
-    await repository.postEstadio(estadio);
+    try {
+      await repository.postEstadio(estadio);
+    } on Exception catch (e) {
+      print(e);
+    }
   }
 
   @action
   Future getEstadios() async {
-    estadios = await repository.getEstadios();
+    try {
+      estadios = await repository.getEstadios();
+    } on Exception catch (e) {
+      print(e);
+    }
   }
 
   @action
   Future getClubById(String id) async {
-    return await repository.getClubeById(id);
+    try {
+      return await repository.getClubeById(id);
+    } on Exception catch (e) {
+      print(e);
+    }
   }
 
   @action
-  Future deleteEstadios(String nome) {
-    return repository.deleteEstadio(nome);
+  Future deleteEstadios(String nome) async {
+    try {
+      return await repository.deleteEstadio(nome);
+    } on Exception catch (e) {
+      print(e);
+    }
   }
 
   @action
-  Future patchEstadios(Estadios estadio, String nome) {
-    return repository.patchEstadio(nome, estadio);
+  Future patchEstadios(Estadios estadio, String nome) async {
+    try {
+      return await repository.patchEstadio(nome, estadio);
+    } on Exception catch (e) {
+      print(e);
+    }
   }
 }

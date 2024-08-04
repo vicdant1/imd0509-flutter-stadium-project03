@@ -1,6 +1,6 @@
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:stadium/autenticacao/autenticacao_page.dart';
 import 'package:stadium/home/home_controller.dart';
+import 'package:stadium/home/pages/home_page.dart';
 import 'package:stadium/home/repository/home_repository.dart';
 
 class HomeMoudle extends Module {
@@ -14,7 +14,7 @@ class HomeMoudle extends Module {
   List<ModularRoute> get routes => [
         ChildRoute(
           Modular.initialRoute,
-          child: (_, args) => const AutenticacaoPage(),
+          child: (_, args) => const HomePage(),
           transition: TransitionType.fadeIn,
         ),
       ];

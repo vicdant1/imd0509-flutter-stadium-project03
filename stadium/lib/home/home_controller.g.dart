@@ -25,6 +25,22 @@ mixin _$HomeController on _HomeControllerBase, Store {
     });
   }
 
+  late final _$localizacaoAtom =
+      Atom(name: '_HomeControllerBase.localizacao', context: context);
+
+  @override
+  String? get localizacao {
+    _$localizacaoAtom.reportRead();
+    return super.localizacao;
+  }
+
+  @override
+  set localizacao(String? value) {
+    _$localizacaoAtom.reportWrite(value, super.localizacao, () {
+      super.localizacao = value;
+    });
+  }
+
   late final _$idSelecionadoAtom =
       Atom(name: '_HomeControllerBase.idSelecionado', context: context);
 
@@ -105,6 +121,14 @@ mixin _$HomeController on _HomeControllerBase, Store {
     });
   }
 
+  late final _$getLocationAsyncAction =
+      AsyncAction('_HomeControllerBase.getLocation', context: context);
+
+  @override
+  Future<dynamic> getLocation() {
+    return _$getLocationAsyncAction.run(() => super.getLocation());
+  }
+
   late final _$getClubesAsyncAction =
       AsyncAction('_HomeControllerBase.getClubes', context: context);
 
@@ -129,6 +153,23 @@ mixin _$HomeController on _HomeControllerBase, Store {
     return _$getClubByIdAsyncAction.run(() => super.getClubById(id));
   }
 
+  late final _$deleteEstadiosAsyncAction =
+      AsyncAction('_HomeControllerBase.deleteEstadios', context: context);
+
+  @override
+  Future<dynamic> deleteEstadios(String nome) {
+    return _$deleteEstadiosAsyncAction.run(() => super.deleteEstadios(nome));
+  }
+
+  late final _$patchEstadiosAsyncAction =
+      AsyncAction('_HomeControllerBase.patchEstadios', context: context);
+
+  @override
+  Future<dynamic> patchEstadios(Estadios estadio, String nome) {
+    return _$patchEstadiosAsyncAction
+        .run(() => super.patchEstadios(estadio, nome));
+  }
+
   late final _$_HomeControllerBaseActionController =
       ActionController(name: '_HomeControllerBase', context: context);
 
@@ -144,31 +185,10 @@ mixin _$HomeController on _HomeControllerBase, Store {
   }
 
   @override
-  Future<dynamic> deleteEstadios(String nome) {
-    final _$actionInfo = _$_HomeControllerBaseActionController.startAction(
-        name: '_HomeControllerBase.deleteEstadios');
-    try {
-      return super.deleteEstadios(nome);
-    } finally {
-      _$_HomeControllerBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  Future<dynamic> patchEstadios(Estadios estadio, String nome) {
-    final _$actionInfo = _$_HomeControllerBaseActionController.startAction(
-        name: '_HomeControllerBase.patchEstadios');
-    try {
-      return super.patchEstadios(estadio, nome);
-    } finally {
-      _$_HomeControllerBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
   String toString() {
     return '''
 valorSelecionado: ${valorSelecionado},
+localizacao: ${localizacao},
 idSelecionado: ${idSelecionado},
 valorDropDown: ${valorDropDown},
 clubes: ${clubes},
