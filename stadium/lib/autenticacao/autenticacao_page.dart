@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:stadium/home/pages/home_page.dart';
+import 'package:stadium/autenticacao/autenticacao_controller.dart';
+import 'package:stadium/autenticacao/widgets/campos_auth_widget.dart';
 
 class AutenticacaoPage extends StatefulWidget {
   const AutenticacaoPage({super.key});
@@ -10,13 +11,17 @@ class AutenticacaoPage extends StatefulWidget {
 }
 
 class _AutenticacaoPageState extends State<AutenticacaoPage> {
+  final controller = Modular.get<AutenticacaoController>();
+
   final loginTextController = TextEditingController();
   final senhaTextController = TextEditingController();
+
   late bool isActive;
   late bool isobscureText;
 
   @override
   void initState() {
+    controller.verificaPersistencia();
     isActive = false;
     isobscureText = true;
     super.initState();
@@ -38,7 +43,11 @@ class _AutenticacaoPageState extends State<AutenticacaoPage> {
                 const SizedBox(
                   height: 50,
                 ),
-                buildCampos(),
+                CamposAuthWidget(
+                  loginTextController: loginTextController,
+                  senhaTextController: senhaTextController,
+                  isobscureText: isobscureText,
+                ),
                 const SizedBox(
                   height: 20,
                 ),
@@ -50,7 +59,7 @@ class _AutenticacaoPageState extends State<AutenticacaoPage> {
                 const SizedBox(
                   height: 25,
                 ),
-                esqueceuSenha(),
+                registerAccount(),
               ],
             ),
           ),
@@ -73,92 +82,6 @@ class _AutenticacaoPageState extends State<AutenticacaoPage> {
     );
   }
 
-  Widget buildCampos() {
-    return Column(
-      children: [
-        TextFormField(
-          controller: loginTextController,
-          decoration: InputDecoration(
-            contentPadding: const EdgeInsets.all(20),
-            hintText: 'Email',
-            filled: true,
-            hintStyle: const TextStyle(
-              color: Color(0xffBDBDBD),
-              fontSize: 16,
-            ),
-            isDense: true,
-            fillColor: const Color(0xffF6F6F6),
-            focusColor: const Color(0xffF6F6F6),
-            border: InputBorder.none,
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: const Color(0xffC8C8C8).withOpacity(0.5),
-                width: 1.0,
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: const Color(0xffC8C8C8).withOpacity(0.5),
-                width: 1.0,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(
-          height: 15,
-        ),
-        SingleChildScrollView(
-          child: TextFormField(
-            obscureText: isobscureText,
-            controller: senhaTextController,
-            decoration: InputDecoration(
-              contentPadding: const EdgeInsets.all(20),
-              hintText: 'Senha',
-              hintStyle: const TextStyle(
-                color: Color(0xffBDBDBD),
-                fontSize: 16,
-              ),
-              isDense: true,
-              filled: true,
-              suffix: GestureDetector(
-                onTap: () {
-                  isobscureText = !isobscureText;
-                  setState(() {});
-                },
-                child: const Text(
-                  'Mostrar',
-                  style: TextStyle(
-                      color: Color(
-                        0xff09554B,
-                      ),
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-              fillColor: const Color(0xffF6F6F6),
-              border: InputBorder.none,
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: const Color(0xffC8C8C8).withOpacity(0.5),
-                  width: 1.0,
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: const Color(0xffC8C8C8).withOpacity(0.5),
-                  width: 1.0,
-                ),
-              ),
-            ),
-          ),
-        )
-      ],
-    );
-  }
-
   Widget checkTheBox() {
     return Row(
       children: [
@@ -170,12 +93,13 @@ class _AutenticacaoPageState extends State<AutenticacaoPage> {
             ),
             onChanged: (value) {
               isActive = !isActive;
+
               setState(() {});
             }),
         Flexible(
           child: RichText(
             text: const TextSpan(
-              text: 'Concordo com os ',
+              text: 'Salvar minhas ',
               style: TextStyle(
                   color: Colors.black,
                   fontSize: 14,
@@ -183,7 +107,7 @@ class _AutenticacaoPageState extends State<AutenticacaoPage> {
                   fontFamily: 'Poppins'),
               children: [
                 TextSpan(
-                    text: 'Termos de políticas e privacidade',
+                    text: 'informações de login',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Color(
@@ -200,8 +124,10 @@ class _AutenticacaoPageState extends State<AutenticacaoPage> {
 
   Widget botaoAcessar() {
     return GestureDetector(
-      onTap: () => Modular.to
-          .push(MaterialPageRoute(builder: (context) => const HomePage())),
+      onTap: () async {
+        await controller.login(
+            loginTextController.text, senhaTextController.text, context);
+      },
       child: Container(
         height: 60,
         width: MediaQuery.of(context).size.width,
@@ -221,13 +147,18 @@ class _AutenticacaoPageState extends State<AutenticacaoPage> {
     );
   }
 
-  Widget esqueceuSenha() {
-    return const Text('Esqueceu a senha?',
-        style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color(
-              0xff09554B,
-            ),
-            fontSize: 15));
+  Widget registerAccount() {
+    return GestureDetector(
+      onTap: () {
+        Modular.to.pushNamed('/cadastro');
+      },
+      child: const Text('Cadastra-se agora',
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Color(
+                0xff09554B,
+              ),
+              fontSize: 15)),
+    );
   }
 }
