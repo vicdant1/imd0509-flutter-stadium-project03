@@ -2,7 +2,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stadium/models/jogadores.dart';
 
-part 'clubes.g.dart';
+part 'generated/clubes.g.dart';
 
 @JsonSerializable()
 class Clubes {

@@ -121,6 +121,46 @@ mixin _$HomeController on _HomeControllerBase, Store {
     });
   }
 
+  late final _$statusLocalizacaoAtom =
+      Atom(name: '_HomeControllerBase.statusLocalizacao', context: context);
+
+  @override
+  Status get statusLocalizacao {
+    _$statusLocalizacaoAtom.reportRead();
+    return super.statusLocalizacao;
+  }
+
+  @override
+  set statusLocalizacao(Status value) {
+    _$statusLocalizacaoAtom.reportWrite(value, super.statusLocalizacao, () {
+      super.statusLocalizacao = value;
+    });
+  }
+
+  late final _$estadiosProximosAtom =
+      Atom(name: '_HomeControllerBase.estadiosProximos', context: context);
+
+  @override
+  bool get estadiosProximos {
+    _$estadiosProximosAtom.reportRead();
+    return super.estadiosProximos;
+  }
+
+  @override
+  set estadiosProximos(bool value) {
+    _$estadiosProximosAtom.reportWrite(value, super.estadiosProximos, () {
+      super.estadiosProximos = value;
+    });
+  }
+
+  late final _$initAsyncAction =
+      AsyncAction('_HomeControllerBase.init', context: context);
+
+  @override
+  Future<dynamic> init() {
+    return _$initAsyncAction.run(() => super.init());
+  }
+
   late final _$getLocationAsyncAction =
       AsyncAction('_HomeControllerBase.getLocation', context: context);
 
@@ -174,6 +214,17 @@ mixin _$HomeController on _HomeControllerBase, Store {
       ActionController(name: '_HomeControllerBase', context: context);
 
   @override
+  void setEstadioProximos(bool value) {
+    final _$actionInfo = _$_HomeControllerBaseActionController.startAction(
+        name: '_HomeControllerBase.setEstadioProximos');
+    try {
+      return super.setEstadioProximos(value);
+    } finally {
+      _$_HomeControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setValorSelecionado(int? value) {
     final _$actionInfo = _$_HomeControllerBaseActionController.startAction(
         name: '_HomeControllerBase.setValorSelecionado');
@@ -193,7 +244,9 @@ idSelecionado: ${idSelecionado},
 valorDropDown: ${valorDropDown},
 clubes: ${clubes},
 jogadores: ${jogadores},
-estadios: ${estadios}
+estadios: ${estadios},
+statusLocalizacao: ${statusLocalizacao},
+estadiosProximos: ${estadiosProximos}
     ''';
   }
 }

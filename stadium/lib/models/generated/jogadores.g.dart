@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'jogadores.dart';
+part of '../jogadores.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

@@ -14,13 +14,14 @@ class CreateClube extends StatefulWidget {
 }
 
 class _CreateClubeState extends State<CreateClube> {
+  final HomeController controller = Modular.get();
+  final _formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     controller.nomeController.clear();
     super.initState();
   }
-
-  final HomeController controller = Modular.get();
 
   @override
   Widget build(BuildContext context) {
@@ -31,24 +32,28 @@ class _CreateClubeState extends State<CreateClube> {
       body: Column(children: [
         Padding(
           padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              CustomForms(controller: controller.nomeController, hint: 'Nome'),
-              const SizedBox(
-                height: 15,
-              ),
-              CustomForms(
-                  controller: controller.imagemUrlController,
-                  hint: 'Imagem URL'),
-              const SizedBox(
-                height: 15,
-              ),
-              CustomForms(
-                  controller: controller.tituloController, hint: 'TItulos'),
-              const SizedBox(
-                height: 15,
-              ),
-            ],
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                CustomForms(
+                    controller: controller.nomeController, hint: 'Nome'),
+                const SizedBox(
+                  height: 15,
+                ),
+                CustomForms(
+                    controller: controller.imagemUrlController,
+                    hint: 'Imagem URL'),
+                const SizedBox(
+                  height: 15,
+                ),
+                CustomForms(
+                    controller: controller.tituloController, hint: 'TItulos'),
+                const SizedBox(
+                  height: 15,
+                ),
+              ],
+            ),
           ),
         ),
         Padding(
@@ -61,6 +66,9 @@ class _CreateClubeState extends State<CreateClube> {
                 backgroundColor: const Color(0xff09554B),
               ),
               onPressed: () async {
+                if (!_formKey.currentState!.validate()) {
+                  return;
+                }
                 await controller.postClube(
                   Clubes(
                       nome: controller.nomeController.text,

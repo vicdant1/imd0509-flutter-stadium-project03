@@ -10,6 +10,7 @@ import 'package:stadium/models/user.dart';
 import 'package:stadium/services/files_service.dart';
 import 'package:stadium/services/select_file_service_widget.dart';
 import 'package:stadium/utils/custom_snackbar.dart';
+import 'package:stadium/utils/status.dart';
 
 class CadastroPage extends StatefulWidget {
   const CadastroPage({super.key});
@@ -22,6 +23,7 @@ class _CadastroPageState extends State<CadastroPage> {
   final controller = Modular.get<AutenticacaoController>();
   final loginTextController = TextEditingController();
   final senhaTextController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -48,6 +50,7 @@ class _CadastroPageState extends State<CadastroPage> {
                   height: 50,
                 ),
                 CamposAuthWidget(
+                  formKey: _formKey,
                   loginTextController: loginTextController,
                   senhaTextController: senhaTextController,
                 ),
@@ -88,18 +91,24 @@ class _CadastroPageState extends State<CadastroPage> {
   Widget botaoAcessar() {
     return GestureDetector(
       onTap: () async {
+        if (!_formKey.currentState!.validate()) {
+          return;
+        }
         await controller.cadastrarUsuario(
           Users(
             loginTextController.text,
             md5.convert(utf8.encode(senhaTextController.text)).toString(),
             await convertFiletoBase64(
-                controller.fotoPerfilCadastro?.path ?? ''),
+              controller.fotoPerfilCadastro?.path ?? '',
+            ),
           ),
         );
 
         // ignore: use_build_context_synchronously
         customSnackBar('Usuário cadastrado com sucesso',
-            context: context, corFundo: Colors.green, icon: Icons.check);
+            context: context,
+            corFundo: const Color(0xff09554B),
+            icon: Icons.check);
         Modular.to.pop();
       },
       child: Container(
@@ -111,12 +120,26 @@ class _CadastroPageState extends State<CadastroPage> {
             0xff09554B,
           ),
         ),
-        child: const Center(
-            child: Text(
-          'Cadastrar',
-          style: TextStyle(
-              fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16),
-        )),
+        child: Observer(builder: (_) {
+          switch (controller.statusCadastro) {
+            case Status.loading:
+              return const Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              );
+            default:
+              return const Center(
+                  child: Text(
+                'Cadastrar',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 16),
+              ));
+          }
+        }),
       ),
     );
   }

@@ -28,6 +28,7 @@ dependencies:
   firebase_messaging: ^14.7.10
   shared_preferences: ^2.0.6
   local_auth: ^2.1.8  
+  flutter_local_notifications: ^9.1.1
 
 
 

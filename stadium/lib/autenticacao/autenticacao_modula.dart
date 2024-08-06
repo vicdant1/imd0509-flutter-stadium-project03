@@ -3,6 +3,7 @@ import 'package:stadium/autenticacao/autenticacao_controller.dart';
 import 'package:stadium/autenticacao/autenticacao_page.dart';
 import 'package:stadium/autenticacao/autenticacao_repository.dart';
 import 'package:stadium/autenticacao/cadastro_page.dart';
+import 'package:stadium/services/firebase_msg_service.dart';
 
 class AutenticacaoModule extends Module {
   @override
@@ -12,6 +13,9 @@ class AutenticacaoModule extends Module {
         ),
         Bind(
           (i) => AutenticacaoController(),
+        ),
+        Bind(
+          (i) => FirebaseMessagingService(),
         ),
       ];
 

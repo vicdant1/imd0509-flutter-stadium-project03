@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'estadios.dart';
+part of '../estadios.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

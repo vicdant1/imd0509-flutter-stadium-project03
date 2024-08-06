@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'clubes.dart';
+part of '../clubes.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

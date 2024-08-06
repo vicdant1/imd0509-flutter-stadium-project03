@@ -13,6 +13,12 @@ class CustomForms extends StatelessWidget {
     return SingleChildScrollView(
       child: TextFormField(
         controller: controller,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Campo obrigatório *';
+          }
+          return null;
+        },
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.all(20),
           hintText: hint,

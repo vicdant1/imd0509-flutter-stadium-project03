@@ -5,11 +5,10 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:stadium/autenticacao/autenticacao_controller.dart';
 import 'package:stadium/home/home_controller.dart';
 import 'package:stadium/home/pages/clubes_page.dart';
-import 'package:stadium/home/pages/create_clube.dart';
-import 'package:stadium/home/pages/create_estadio_page.dart';
 import 'package:stadium/home/pages/estadio_page.dart';
 import 'package:stadium/models/clubes.dart';
 import 'package:stadium/models/estadios.dart';
+import 'package:stadium/utils/status.dart';
 import 'package:stadium/utils/styles.dart';
 
 class HomePage extends StatefulWidget {
@@ -25,9 +24,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    controller.getEstadios();
-    controller.getLocation();
-    controller.getClubes();
+    controller.init();
     super.initState();
   }
 
@@ -36,15 +33,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (controller.valorSelecionado == 1) {
-            Modular.to.push(
-                MaterialPageRoute(builder: (context) => const CreateClube()));
-          } else {
-            Modular.to.push(
-                MaterialPageRoute(builder: (context) => const CreateEstadio()));
-          }
-        },
+        onPressed: controller.createNew,
         backgroundColor: const Color(0xff09554B),
         child: const Icon(Icons.add),
       ),
@@ -54,43 +43,7 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(
             height: 20,
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 20, bottom: 10),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.location_on_rounded,
-                  color: Color(0xff09554B),
-                  size: 30,
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Sua Localização',
-                      style: titleStyle,
-                    ),
-                    const SizedBox(
-                      height: 2,
-                    ),
-                    Observer(builder: (_) {
-                      return SizedBox(
-                        width: MediaQuery.of(context).size.width / 1.2,
-                        child: Text(controller.localizacao ?? '',
-                            style: const TextStyle(
-                              color: Color(0xff09554B),
-                              fontSize: 13,
-                            )),
-                      );
-                    }),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          _buildLocal(),
           const SizedBox(
             height: 5,
           ),
@@ -98,27 +51,86 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(
             height: 15,
           ),
-          Observer(builder: (_) {
-            if (controller.valorSelecionado == 1) {
-              return Column(
-                children: controller.clubes.map((c) {
-                  return _buildCardClub(c);
-                }).toList(),
-              );
-            } else {
-              return Column(
-                children: controller.estadios.map((e) {
-                  if (e.localizacao ==
-                      controller.localizacao?.split(',')[3].trim()) {
-                    return _buildCardStadium(e);
-                  } else {
-                    return Container();
-                  }
-                }).toList(),
-              );
-            }
-          }),
+          oberserListClubesEstadios()
         ]),
+      ),
+    );
+  }
+
+  Widget oberserListClubesEstadios() {
+    return Observer(builder: (_) {
+      if (controller.valorSelecionado == 1) {
+        return Column(
+          children: controller.clubes.map((c) {
+            return _buildCardClub(c);
+          }).toList(),
+        );
+      } else {
+        return Column(children: [
+          buildBotaoEstadiosProximos(),
+          ...controller.estadios.map((e) {
+            switch (controller.estadiosProximos) {
+              case true:
+                if (e.localizacao ==
+                    controller.localizacao?.split(',')[3].trim()) {
+                  return _buildCardStadium(e);
+                } else {
+                  return const SizedBox();
+                }
+
+              case false:
+                return _buildCardStadium(e);
+            }
+          }).toList(),
+        ]);
+      }
+    });
+  }
+
+  Widget _buildLocal() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 20, bottom: 10),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.location_on_rounded,
+            color: Color(0xff09554B),
+            size: 30,
+          ),
+          const SizedBox(
+            width: 10,
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Sua Localização',
+                style: titleStyle,
+              ),
+              const SizedBox(
+                height: 3,
+              ),
+              Observer(builder: (_) {
+                switch (controller.statusLocalizacao) {
+                  case Status.loading:
+                    return SizedBox(
+                        width: MediaQuery.of(context).size.width / 1.2,
+                        child: const LinearProgressIndicator(
+                            backgroundColor: Color(0xff09554B),
+                            color: Colors.white));
+                  default:
+                    return SizedBox(
+                        width: MediaQuery.of(context).size.width / 1.2,
+                        child: Text(controller.localizacao ?? '',
+                            style: const TextStyle(
+                              color: Color(0xff09554B),
+                              fontSize: 13,
+                            )));
+                }
+              }),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -150,56 +162,66 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHeader() {
-    return GestureDetector(
-      onTap: () {
-        //popupSelecaoAnexo();
-      },
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(10, 70, 0, 20),
-        height: 150,
-        decoration: const BoxDecoration(
-          color: Color(
-            0xff09554B,
-          ),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(10, 70, 30, 20),
+      height: 150,
+      decoration: const BoxDecoration(
+        color: Color(
+          0xff09554B,
         ),
-        child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          Observer(builder: (_) {
-            return SizedBox(
-              height: 60,
-              width: 60,
-              child: CircleAvatar(
-                backgroundImage: FileImage(
-                  authController.fotoPerfil!,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+            Observer(builder: (_) {
+              return SizedBox(
+                height: 60,
+                width: 60,
+                child: CircleAvatar(
+                  backgroundImage: FileImage(
+                    authController.fotoPerfil!,
+                  ),
                 ),
-              ),
-            );
-          }),
-          const SizedBox(
-            width: 15,
+              );
+            }),
+            const SizedBox(
+              width: 15,
+            ),
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Bem-vindo ao Stadium!',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+                SizedBox(height: 3),
+                Text(
+                  'O melhor app de futebol',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ]),
+          GestureDetector(
+            onTap: () {
+              controller.logout();
+            },
+            child: const Icon(
+              Icons.logout_rounded,
+              color: Colors.white,
+              size: 30,
+            ),
           ),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Bem-vindo ao Stadium!',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
-              ),
-              SizedBox(height: 3),
-              Text(
-                'O melhor app de futebol',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        ]),
+        ],
       ),
     );
   }
@@ -388,21 +410,29 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // void popupSelecaoAnexo() {
-  //   showModalBottomSheet(
-  //     shape: const RoundedRectangleBorder(
-  //       side: BorderSide(style: BorderStyle.none),
-  //       borderRadius: BorderRadius.only(
-  //         topLeft: Radius.circular(12),
-  //         topRight: Radius.circular(12),
-  //       ),
-  //     ),
-  //     isDismissible: true,
-  //     context: context,
-  //     isScrollControlled: true,
-  //     builder: (BuildContext context) {
-  //       return SelectFileService();
-  //     },
-  //   );
-  // }
+  Widget buildBotaoEstadiosProximos() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 20, bottom: 10),
+      child: Row(
+        children: [
+          Observer(builder: (_) {
+            return CupertinoSwitch(
+                activeColor: const Color(0xff09554B),
+                value: controller.estadiosProximos,
+                onChanged: controller.setEstadioProximos);
+          }),
+          const SizedBox(
+            width: 10,
+          ),
+          const Text(
+            'Ver apenas estadios próximos',
+            style: TextStyle(
+              color: Color(0xff09554B),
+              fontSize: 14,
+            ),
+          )
+        ],
+      ),
+    );
+  }
 }

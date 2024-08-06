@@ -11,6 +11,7 @@ import 'package:stadium/autenticacao/autenticacao_repository.dart';
 import 'package:stadium/models/user.dart';
 import 'package:stadium/services/shared_prefs.dart';
 import 'package:stadium/utils/custom_snackbar.dart';
+import 'package:stadium/utils/status.dart';
 
 part 'autenticacao_controller.g.dart';
 
@@ -24,6 +25,12 @@ abstract class _AutenticacaoControllerBase with Store {
   final sharedPrefs = SharedPrefsService();
 
   @observable
+  Status statusLogin = Status.empty;
+
+  @observable
+  Status statusCadastro = Status.empty;
+
+  @observable
   Users? usuarioLogado;
 
   @observable
@@ -35,6 +42,7 @@ abstract class _AutenticacaoControllerBase with Store {
   @action
   Future login(String email, String senha, BuildContext context) async {
     try {
+      statusLogin = Status.loading;
       List<Users> users = await repository.getUsers();
       usuarioLogado = users
           .where((element) =>
@@ -46,8 +54,10 @@ abstract class _AutenticacaoControllerBase with Store {
         await converteBase64ParaFile(usuarioLogado?.base64Perfil ?? '');
       }
       sharedPrefs.save(usuarioLogado?.toJson());
+      statusLogin = Status.success;
       Modular.to.pushNamed('/home');
     } catch (e) {
+      statusLogin = Status.error;
       // ignore: use_build_context_synchronously
       customSnackBar(
         'Senha ou email incorretos',
@@ -68,8 +78,11 @@ abstract class _AutenticacaoControllerBase with Store {
 
   Future cadastrarUsuario(Users users) async {
     try {
+      statusCadastro = Status.loading;
       await repository.postUser(users);
+      statusCadastro = Status.success;
     } catch (e) {
+      statusCadastro = Status.error;
       // Handle error
     }
   }

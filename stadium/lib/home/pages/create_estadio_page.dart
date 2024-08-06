@@ -8,6 +8,7 @@ import 'package:stadium/home/widgets/custom_campo.dart';
 import 'package:stadium/home/widgets/custom_form.dart';
 import 'package:stadium/models/estadios.dart';
 import 'package:stadium/utils/custom_snackbar.dart';
+import 'package:stadium/utils/status.dart';
 
 class CreateEstadio extends StatefulWidget {
   final bool? isEdit;
@@ -24,6 +25,7 @@ class CreateEstadio extends StatefulWidget {
 
 class _CreateEstadioState extends State<CreateEstadio> {
   final HomeController controller = Modular.get();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -52,58 +54,65 @@ class _CreateEstadioState extends State<CreateEstadio> {
         child: Column(children: [
           Padding(
             padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomForms(
-                    controller: controller.nomeController, hint: 'Nome'),
-                const SizedBox(
-                  height: 15,
-                ),
-                CustomForms(
-                  controller: controller.descricaoController,
-                  hint: 'Descrição',
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                CustomForms(
-                    controller: controller.capacidadeMax,
-                    hint: 'Capacidade ( Ex: "180 mil" )'),
-                const SizedBox(
-                  height: 15,
-                ),
-                CustomForms(
-                    controller: controller.imagemUrlController,
-                    hint: 'Imagem URL'),
-                const SizedBox(
-                  height: 15,
-                ),
-                CustomForms(
-                    controller: controller.cidadeController, hint: 'Cidade'),
-                const SizedBox(
-                  height: 15,
-                ),
-                CustomForms(
-                    controller: controller.enderecoController,
-                    hint: 'Endereço'),
-                const SizedBox(
-                  height: 15,
-                ),
-                CustomForms(
-                    controller: controller.latitudeController,
-                    hint: 'Latitude'),
-                const SizedBox(
-                  height: 15,
-                ),
-                CustomForms(
-                    controller: controller.longitudeController,
-                    hint: 'Longitude'),
-                const SizedBox(
-                  height: 25,
-                ),
-                _buildClubes(),
-              ],
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomForms(
+                      controller: controller.nomeController, hint: 'Nome'),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  CustomForms(
+                    controller: controller.descricaoController,
+                    hint: 'Descrição',
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  CustomForms(
+                      controller: controller.capacidadeMax,
+                      hint: 'Capacidade ( Ex: "180 mil" )'),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  CustomForms(
+                      controller: controller.imagemUrlController,
+                      hint: 'Imagem URL'),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  CustomForms(
+                      controller: controller.cidadeController, hint: 'Cidade'),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  CustomForms(
+                      controller: controller.enderecoController,
+                      hint: 'Endereço'),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  CustomForms(
+                      controller: controller.latitudeController,
+                      hint: 'Latitude'),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  CustomForms(
+                      controller: controller.longitudeController,
+                      hint: 'Longitude'),
+                  const SizedBox(
+                    height: 25,
+                  ),
+                  const Text('Clube do estádio'),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  _buildClubes(),
+                ],
+              ),
             ),
           ),
           const SizedBox(
@@ -119,6 +128,9 @@ class _CreateEstadioState extends State<CreateEstadio> {
                   backgroundColor: const Color(0xff09554B),
                 ),
                 onPressed: () async {
+                  if (!_formKey.currentState!.validate()) {
+                    return;
+                  }
                   if (widget.isEdit == true) {
                     await controller.patchEstadios(
                         Estadios(
@@ -162,6 +174,7 @@ class _CreateEstadioState extends State<CreateEstadio> {
                   }
 
                   controller.getEstadios();
+                  // ignore: use_build_context_synchronously
                   customSnackBar(
                       widget.isEdit == true
                           ? 'Estadio editado com sucesso'
@@ -171,14 +184,22 @@ class _CreateEstadioState extends State<CreateEstadio> {
                       icon: Icons.done);
                   Modular.to.pop();
                 },
-                child: Text(widget.isEdit == true ? 'Editar' : 'Salvar'),
+                child: controller.statusPostClube != Status.loading
+                    ? Text(widget.isEdit == true ? 'Editar' : 'Salvar')
+                    : const CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
               ),
             ),
           ),
           const SizedBox(
             height: 20,
           ),
-          const Text('Cancelar')
+          const Text('Cancelar'),
+          const SizedBox(
+            height: 30,
+          ),
         ]),
       ),
     );

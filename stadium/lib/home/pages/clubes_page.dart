@@ -19,6 +19,7 @@ class ClubePage extends StatefulWidget {
 
 class _ClubePageState extends State<ClubePage> {
   final HomeController controller = Modular.get();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -259,65 +260,71 @@ class _ClubePageState extends State<ClubePage> {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 35, 20, 0),
             child: SingleChildScrollView(
-                child: Column(
-              children: [
-                const Text(
-                  'Adicionar Jogador',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                CustomForms(
-                  controller: controller.nomeController,
-                  hint: 'Nome',
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                CustomForms(
-                  controller: controller.posicaoController,
-                  hint: 'Posição',
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                SizedBox(
-                  height: 55,
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff09554B),
+                child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  const Text(
+                    'Adicionar Jogador',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
-                    onPressed: () async {
-                      controller.jogadores =
-                          widget.clube.jogadores as List<Jogador>;
-                      controller.jogadores.add(
-                        Jogador(
-                          nome: controller.nomeController.text,
-                          posicao: controller.posicaoController.text,
-                        ),
-                      );
-                      await controller.postJogador(
-                        controller.jogadores,
-                        widget.clube.id,
-                      );
-                      // ignore: use_build_context_synchronously
-                      customSnackBar('Jogador adicionado com sucesso',
-                          context: context,
-                          corFundo: const Color.fromARGB(255, 82, 151, 86),
-                          icon: Icons.done);
-                      await controller.getClubes();
-                      Modular.to.pop();
-                      setState(() {});
-                    },
-                    child: const Text('Salvar'),
                   ),
-                ),
-              ],
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  CustomForms(
+                    controller: controller.nomeController,
+                    hint: 'Nome',
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  CustomForms(
+                    controller: controller.posicaoController,
+                    hint: 'Posição',
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  SizedBox(
+                    height: 55,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xff09554B),
+                      ),
+                      onPressed: () async {
+                        if (!_formKey.currentState!.validate()) {
+                          return;
+                        }
+                        controller.jogadores =
+                            widget.clube.jogadores as List<Jogador>;
+                        controller.jogadores.add(
+                          Jogador(
+                            nome: controller.nomeController.text,
+                            posicao: controller.posicaoController.text,
+                          ),
+                        );
+                        await controller.postJogador(
+                          controller.jogadores,
+                          widget.clube.id,
+                        );
+                        // ignore: use_build_context_synchronously
+                        customSnackBar('Jogador adicionado com sucesso',
+                            context: context,
+                            corFundo: const Color.fromARGB(255, 82, 151, 86),
+                            icon: Icons.done);
+                        await controller.getClubes();
+                        Modular.to.pop();
+                        setState(() {});
+                      },
+                      child: const Text('Salvar'),
+                    ),
+                  ),
+                ],
+              ),
             )),
           ),
         );

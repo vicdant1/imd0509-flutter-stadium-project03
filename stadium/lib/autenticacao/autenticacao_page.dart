@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:stadium/autenticacao/autenticacao_controller.dart';
 import 'package:stadium/autenticacao/widgets/campos_auth_widget.dart';
+import 'package:stadium/services/firebase_msg_service.dart';
+import 'package:stadium/utils/status.dart';
 
 class AutenticacaoPage extends StatefulWidget {
   const AutenticacaoPage({super.key});
@@ -12,15 +15,19 @@ class AutenticacaoPage extends StatefulWidget {
 
 class _AutenticacaoPageState extends State<AutenticacaoPage> {
   final controller = Modular.get<AutenticacaoController>();
+  final menssaging = Modular.get<FirebaseMessagingService>();
 
   final loginTextController = TextEditingController();
   final senhaTextController = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
 
   late bool isActive;
   late bool isobscureText;
 
   @override
   void initState() {
+    menssaging.initialize();
     controller.verificaPersistencia();
     isActive = false;
     isobscureText = true;
@@ -47,6 +54,7 @@ class _AutenticacaoPageState extends State<AutenticacaoPage> {
                   loginTextController: loginTextController,
                   senhaTextController: senhaTextController,
                   isobscureText: isobscureText,
+                  formKey: _formKey,
                 ),
                 const SizedBox(
                   height: 20,
@@ -125,8 +133,12 @@ class _AutenticacaoPageState extends State<AutenticacaoPage> {
   Widget botaoAcessar() {
     return GestureDetector(
       onTap: () async {
+        if (!_formKey.currentState!.validate()) {
+          return;
+        }
         await controller.login(
             loginTextController.text, senhaTextController.text, context);
+        senhaTextController.clear();
       },
       child: Container(
         height: 60,
@@ -137,12 +149,27 @@ class _AutenticacaoPageState extends State<AutenticacaoPage> {
             0xff09554B,
           ),
         ),
-        child: const Center(
-            child: Text(
-          'Acessar',
-          style: TextStyle(
-              fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16),
-        )),
+        child: Observer(builder: (_) {
+          switch (controller.statusLogin) {
+            case Status.loading:
+              return const Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              );
+            default:
+              return const Center(
+                child: Text(
+                  'Acessar',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 16),
+                ),
+              );
+          }
+        }),
       ),
     );
   }

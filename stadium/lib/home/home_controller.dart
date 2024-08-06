@@ -1,11 +1,15 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
+import 'package:stadium/home/pages/create_clube.dart';
+import 'package:stadium/home/pages/create_estadio_page.dart';
 import 'package:stadium/home/repository/home_repository.dart';
 import 'package:stadium/local_service.dart';
 import 'package:stadium/models/clubes.dart';
 import 'package:stadium/models/estadios.dart';
 import 'package:stadium/models/jogadores.dart';
+import 'package:stadium/services/shared_prefs.dart';
+import 'package:stadium/utils/status.dart';
 
 part 'home_controller.g.dart';
 
@@ -50,22 +54,55 @@ abstract class _HomeControllerBase with Store {
   @observable
   List<Estadios> estadios = [];
 
+  @observable
+  Status statusLocalizacao = Status.empty;
+
+  @observable
+  Status statusPostClube = Status.empty;
+
+  @observable
+  bool estadiosProximos = false;
+
+  @action
+  void setEstadioProximos(bool value) => estadiosProximos = value;
+
+  void createNew() => valorSelecionado == 1
+      ? Modular.to
+          .push(MaterialPageRoute(builder: (context) => const CreateClube()))
+      : Modular.to
+          .push(MaterialPageRoute(builder: (context) => const CreateEstadio()));
+
+  @action
+  Future init() async {
+    return Future.wait([getEstadios(), getLocation(), getClubes()]);
+  }
+
   @action
   Future getLocation() async {
-    localizacao = await locationService.getCurrentAddress();
+    try {
+      statusLocalizacao = Status.loading;
+      localizacao = await locationService.getCurrentAddress();
+      statusLocalizacao = Status.success;
+    } on Exception {
+      statusLocalizacao = Status.error;
+    }
   }
 
   @action
   void setValorSelecionado(int? value) => valorSelecionado = value ?? 0;
 
+  @action
   Future postClube(Clubes clube) async {
     try {
+      statusPostClube = Status.loading;
       await repository.postClube(clube);
-    } on Exception catch (e) {
-      print(e);
+      statusPostClube = Status.success;
+    } on Exception {
+      statusPostClube = Status.error;
     }
   }
 
+  @action
   Future postJogador(List<Jogador> jogador, String id) async {
     try {
       await repository.postJogador(jogador, id);
@@ -125,5 +162,11 @@ abstract class _HomeControllerBase with Store {
     } on Exception catch (e) {
       print(e);
     }
+  }
+
+  Future logout() async {
+    final SharedPrefsService sharedPrefs = SharedPrefsService();
+    await sharedPrefs.remove();
+    Modular.to.pushReplacementNamed('/');
   }
 }
